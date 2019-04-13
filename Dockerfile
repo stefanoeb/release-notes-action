@@ -7,5 +7,7 @@ LABEL "com.github.actions.color"="yellow"
 
 COPY . /
 
+RUN yarn install --production=true
+
 
 ENTRYPOINT ["node", "/entrypoint.js"]
