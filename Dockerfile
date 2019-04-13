@@ -5,7 +5,7 @@ LABEL "com.github.actions.description"="Generate release notes on Github based o
 LABEL "com.github.actions.icon"="circle"
 LABEL "com.github.actions.color"="yellow"
 
-COPY entrypoint.js /entrypoint.js
+COPY . /
 
 
 ENTRYPOINT ["node", "/entrypoint.js"]
