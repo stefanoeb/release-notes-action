@@ -8,6 +8,7 @@ LABEL "com.github.actions.color"="yellow"
 COPY . /
 
 RUN yarn install --production=true
-
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh
 
 ENTRYPOINT ["node", "/entrypoint.js"]
