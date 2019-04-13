@@ -1,0 +1,30 @@
+{
+  "name": "release-notes-action",
+  "version": "0.0.1",
+  "description": "Script to generate release notes",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefanoeb/release-notes-action.git"
+  },
+  "author": "stefanoeb",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stefanoeb/release-notes-action/issues"
+  },
+  "homepage": "https://github.com/stefanoeb/release-notes-action#readme",
+  "dependencies": {
+    "pretty-release": "^0.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.15.3",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "prettier": "1.16.4",
+    "prettier-eslint": "^8.8.2"
+  }
+}
