@@ -29,14 +29,17 @@ const { releaseBranch, developmentBranch, githubToken } = require('./lib/environ
   if (currentBranch === developmentBranch) {
     // Edit / create draft release
     try {
-      const repoName = await formatRepoName(getRepoName());
-      const versionBeingDrafted = await incrementMinorVersion(getCurrentVersion());
-      let lastDraft = await getLastDraft(getLatestReleases());
+      const repoName = formatRepoName(await getRepoName());
+      const versionBeingDrafted = incrementMinorVersion(await getCurrentVersion());
+      let lastDraft = getLastDraft(await getLatestReleases());
       if (!lastDraft) {
         await generateDraft({ version: versionBeingDrafted, repoName, githubToken });
-        lastDraft = await getLastDraft(getLatestReleases());
+        lastDraft = getLastDraft(await getLatestReleases());
       }
-      const message = await formatMessageWithAuthor(getLastCommitMessage(), getLastCommitAuthor());
+      const message = formatMessageWithAuthor(
+        await getLastCommitMessage(),
+        await getLastCommitAuthor(),
+      );
       validateCommitMessage(message, lastDraft.body);
 
       await updateReleaseDescription({
