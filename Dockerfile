@@ -9,6 +9,6 @@ COPY . /
 
 RUN yarn install --production=true
 RUN apk update && apk upgrade && \
-    apk add --no-cache bash git openssh
+    apk add --no-cache bash git openssh curl
 
 ENTRYPOINT ["node", "/entrypoint.js"]
