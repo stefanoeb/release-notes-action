@@ -21,7 +21,7 @@ const { releaseBranch, developmentBranch, githubToken } = require('./lib/environ
   const currentBranch = await getCurrentBranch();
   if (![releaseBranch, developmentBranch].includes(currentBranch)) {
     console.log(
-      `⏭ Skipping release note scribe because current branch ${currentBranch} not in the selected branches: ${releaseBranch} or ${developmentBranch}`,
+      `⏭ Skipping release note scribe because current branch ${currentBranch} not in the release branches: ${releaseBranch} or ${developmentBranch}`,
     );
     process.exit(78);
   }
