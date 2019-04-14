@@ -28,23 +28,28 @@ const { releaseBranch, developmentBranch, githubToken } = require('./lib/environ
 
   if (currentBranch === developmentBranch) {
     // Edit / create draft release
-    const repoName = await formatRepoName(getRepoName());
-    const versionBeingDrafted = await incrementMinorVersion(getCurrentVersion());
-    let lastDraft = await getLastDraft(getLatestReleases());
-    if (!lastDraft) {
-      await generateDraft({ version: versionBeingDrafted, repoName, githubToken });
-      lastDraft = await getLastDraft(getLatestReleases());
-    }
-    const message = await formatMessageWithAuthor(getLastCommitMessage(), getLastCommitAuthor());
-    validateCommitMessage(message, lastDraft.body);
+    try {
+      const repoName = await formatRepoName(getRepoName());
+      const versionBeingDrafted = await incrementMinorVersion(getCurrentVersion());
+      let lastDraft = await getLastDraft(getLatestReleases());
+      if (!lastDraft) {
+        await generateDraft({ version: versionBeingDrafted, repoName, githubToken });
+        lastDraft = await getLastDraft(getLatestReleases());
+      }
+      const message = await formatMessageWithAuthor(getLastCommitMessage(), getLastCommitAuthor());
+      validateCommitMessage(message, lastDraft.body);
 
-    await updateReleaseDescription({
-      githubToken,
-      version: versionBeingDrafted,
-      releaseNotes: generateNewReleaseDescription(message, lastDraft.body),
-      draftId: lastDraft.id,
-      repoName,
-    });
+      await updateReleaseDescription({
+        githubToken,
+        version: versionBeingDrafted,
+        releaseNotes: generateNewReleaseDescription(message, lastDraft.body),
+        draftId: lastDraft.id,
+        repoName,
+      });
+    } catch (e) {
+      console.log('🚨 Error on the release note scribe: ', e.toString());
+      process.exit(1);
+    }
   }
 
   process.exit(0);
