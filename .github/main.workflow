@@ -1,4 +1,4 @@
-workflow "New workflow" {
+workflow "Push" {
   on = "push"
   resolves = ["Release note scribe", "ESLint"]
 }
