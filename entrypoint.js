@@ -1,12 +1,6 @@
-const {
-  getCurrentBranch,
-  getRepoName,
-  getLastCommitAuthor,
-  getLastCommitMessage,
-} = require('./lib/git');
+const { getCurrentBranch, getLastCommitAuthor, getLastCommitMessage } = require('./lib/git');
 const { getLatestReleases, generateDraft, updateReleaseDescription } = require('./lib/github');
 const {
-  formatRepoName,
   getCurrentVersion,
   incrementMinorVersion,
   getLastDraft,
@@ -15,7 +9,7 @@ const {
   generateNewReleaseDescription,
 } = require('./lib/util');
 
-const { releaseBranch, developmentBranch, githubToken } = require('./lib/environment');
+const { releaseBranch, developmentBranch } = require('./lib/environment');
 
 (async function entrypoint() {
   const currentBranch = await getCurrentBranch();
@@ -23,18 +17,17 @@ const { releaseBranch, developmentBranch, githubToken } = require('./lib/environ
     console.log(
       `⏭ Skipping release note scribe because current branch ${currentBranch} not in the release branches: ${releaseBranch} or ${developmentBranch}`,
     );
-    process.exit(78);
+    process.exit(78); // 78 is skip status on the checks API
   }
 
   if (currentBranch === developmentBranch) {
     // Edit / create draft release
     try {
-      const repoName = formatRepoName(await getRepoName());
       const versionBeingDrafted = incrementMinorVersion(await getCurrentVersion());
-      let lastDraft = getLastDraft(await getLatestReleases(githubToken, repoName));
+      let lastDraft = getLastDraft(await getLatestReleases());
       if (!lastDraft) {
-        await generateDraft({ version: versionBeingDrafted, repoName, githubToken });
-        lastDraft = getLastDraft(await getLatestReleases(githubToken, repoName));
+        await generateDraft(versionBeingDrafted);
+        lastDraft = getLastDraft(await getLatestReleases());
       }
       const message = formatMessageWithAuthor(
         await getLastCommitMessage(),
@@ -43,17 +36,16 @@ const { releaseBranch, developmentBranch, githubToken } = require('./lib/environ
       validateCommitMessage(message, lastDraft.body);
 
       await updateReleaseDescription({
-        githubToken,
         version: versionBeingDrafted,
         releaseNotes: generateNewReleaseDescription(message, lastDraft.body),
         draftId: lastDraft.id,
-        repoName,
       });
     } catch (e) {
-      console.log('🚨 Error on the release note scribe: ', e.toString());
+      console.log('🚨 Error on the release note scribe: ', e);
       process.exit(1);
     }
   }
 
+  console.log('👌 Finished');
   process.exit(0);
 }());
