@@ -31,10 +31,10 @@ const { releaseBranch, developmentBranch, githubToken } = require('./lib/environ
     try {
       const repoName = formatRepoName(await getRepoName());
       const versionBeingDrafted = incrementMinorVersion(await getCurrentVersion());
-      let lastDraft = getLastDraft(await getLatestReleases());
+      let lastDraft = getLastDraft(await getLatestReleases(githubToken, repoName));
       if (!lastDraft) {
         await generateDraft({ version: versionBeingDrafted, repoName, githubToken });
-        lastDraft = getLastDraft(await getLatestReleases());
+        lastDraft = getLastDraft(await getLatestReleases(githubToken, repoName));
       }
       const message = formatMessageWithAuthor(
         await getLastCommitMessage(),
