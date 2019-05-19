@@ -1,4 +1,9 @@
-const { getCurrentBranch, getLastCommitAuthor, getLastCommitMessage } = require('./lib/git');
+const {
+  getCurrentBranch,
+  getLastCommitAuthor,
+  getLastCommitMessage,
+  getCurrentBranch,
+} = require('./lib/git');
 const { getLatestReleases, generateDraft, updateReleaseDescription } = require('./lib/github');
 const {
   getCurrentVersion,
@@ -23,6 +28,7 @@ const { releaseBranch, developmentBranch } = require('./lib/environment');
   if (currentBranch === developmentBranch) {
     // Edit / create draft release
     try {
+      const branch = await getCurrentBranch();
       const versionBeingDrafted = incrementMinorVersion(await getCurrentVersion());
       let lastDraft = getLastDraft(await getLatestReleases());
       if (!lastDraft) {
@@ -30,8 +36,8 @@ const { releaseBranch, developmentBranch } = require('./lib/environment');
         lastDraft = getLastDraft(await getLatestReleases());
       }
       const message = formatMessageWithAuthor(
-        await getLastCommitMessage(),
-        await getLastCommitAuthor(),
+        await getLastCommitMessage(branch),
+        await getLastCommitAuthor(branch),
       );
       validateCommitMessage(message, lastDraft.body);
 
@@ -48,4 +54,4 @@ const { releaseBranch, developmentBranch } = require('./lib/environment');
 
   console.log('👌 Finished');
   process.exit(0);
-}());
+})();
