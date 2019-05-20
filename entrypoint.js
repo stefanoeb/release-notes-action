@@ -13,17 +13,17 @@ const { releaseBranch, developmentBranch } = require('./lib/environment');
 
 (async function entrypoint() {
   console.log('🖋 RELEASE NOTE SCRIBE 🖋');
-  const currentBranch = await getCurrentBranch();
-  if (![releaseBranch, developmentBranch].includes(currentBranch)) {
-    console.log(
-      `⏭ Skipping release note scribe because current branch ${currentBranch} not in the release branches: ${releaseBranch} or ${developmentBranch}`,
-    );
-    process.exit(78); // 78 is skip status on the checks API
-  }
+  try {
+    const currentBranch = await getCurrentBranch();
+    if (![releaseBranch, developmentBranch].includes(currentBranch)) {
+      console.log(
+        `⏭ Skipping release note scribe because current branch ${currentBranch} not in the release branches: ${releaseBranch} or ${developmentBranch}`,
+      );
+      process.exit(78); // 78 is skip status on the checks API
+    }
 
-  if (currentBranch === developmentBranch) {
-    // Edit / create draft release
-    try {
+    if (currentBranch === developmentBranch) {
+      // Edit / create draft release
       const versionBeingDrafted = incrementMinorVersion(await getCurrentVersion());
       let lastDraft = getSpecificVersionDraft(await getLatestReleases(), versionBeingDrafted);
       if (!lastDraft) {
@@ -42,12 +42,35 @@ const { releaseBranch, developmentBranch } = require('./lib/environment');
         draftId: lastDraft.id,
         branch: currentBranch,
       });
-    } catch (e) {
-      console.log('🚨 Error on the release note scribe: ', e);
-      process.exit(1);
     }
-  }
 
-  console.log('👌 Finished');
-  process.exit(0);
+    if (currentBranch === releaseBranch) {
+      const currentVersion = await getCurrentVersion();
+      const currentVersionOnDev = `${currentVersion}-dev`;
+      let lastDraft = getSpecificVersionDraft(await getLatestReleases(), currentVersionOnDev);
+      if (!lastDraft) {
+        await generateDraft(currentVersion, currentBranch);
+        lastDraft = getSpecificVersionDraft(await getLatestReleases(), currentVersion);
+      }
+      const message = formatMessageWithAuthor(
+        await getLastCommitMessage(currentBranch),
+        await getLastCommitAuthor(currentBranch),
+      );
+      validateCommitMessage(message, lastDraft.body);
+
+      await updateReleaseDescription({
+        version: currentVersion,
+        releaseNotes: generateNewReleaseDescription(message, lastDraft.body),
+        draftId: lastDraft.id,
+        branch: currentBranch,
+        draft: false,
+      });
+    }
+
+    console.log('👌 Finished');
+    process.exit(0);
+  } catch (e) {
+    console.log('🚨 Error on the release note scribe for draft: ', e);
+    process.exit(1);
+  }
 }());
