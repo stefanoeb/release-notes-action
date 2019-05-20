@@ -3,7 +3,7 @@ const { getLatestReleases, generateDraft, updateReleaseDescription } = require('
 const {
   getCurrentVersion,
   incrementMinorVersion,
-  getLastDraft,
+  getSpecificVersionDraft,
   validateCommitMessage,
   formatMessageWithAuthor,
   generateNewReleaseDescription,
@@ -25,10 +25,10 @@ const { releaseBranch, developmentBranch } = require('./lib/environment');
     // Edit / create draft release
     try {
       const versionBeingDrafted = incrementMinorVersion(await getCurrentVersion());
-      let lastDraft = getLastDraft(await getLatestReleases());
+      let lastDraft = getSpecificVersionDraft(await getLatestReleases(), versionBeingDrafted);
       if (!lastDraft) {
         await generateDraft(versionBeingDrafted, currentBranch);
-        lastDraft = getLastDraft(await getLatestReleases());
+        lastDraft = getSpecificVersionDraft(await getLatestReleases(), versionBeingDrafted);
       }
       const message = formatMessageWithAuthor(
         await getLastCommitMessage(currentBranch),
